@@ -39,10 +39,10 @@ def retrieve_chunks(question, top_k = 2, similarity_threshold = 0.5):
     finally:
         db.close()
 
-if __name__ == "__main__":
-    result = retrieve_chunks(
-        question="How many annual leave days do interns receive?",
-        top_k=2
-    )
-    for row in result:
-        print(row)
+# if __name__ == "__main__":
+#     result = retrieve_chunks(
+#         question="How many annual leave days do interns receive?",
+#         top_k=2
+#     )
+#     for row in result:
+#         print(row)

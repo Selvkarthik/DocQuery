@@ -1,5 +1,5 @@
-from database import SessionLocal
-from models import DocumentChunk
+from rag.database import SessionLocal
+from rag.models import DocumentChunk
 
 db = SessionLocal()
 
