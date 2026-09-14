@@ -18,10 +18,3 @@ DB_URL = URL.create(
 engine = create_engine(url=DB_URL)
 
 SessionLocal = sessionmaker(autoflush=False, autocommit=False, bind=engine)
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()

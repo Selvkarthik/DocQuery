@@ -3,10 +3,12 @@ from pydantic import BaseModel
 from typing import List
 
 from rag.rag_pipeline import question_answer
+from memory.redis_memory import load_messages, save_messages
 
 app = FastAPI()
 
 class QuestionRequest(BaseModel):
+    session_id : str
     question : str
 
 class Source(BaseModel):
