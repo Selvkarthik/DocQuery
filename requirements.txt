@@ -1,0 +1,27 @@
+# Core FastAPI Web Framework
+fastapi>=0.110.0
+uvicorn[standard]>=0.28.0
+python-multipart>=0.0.9
+pydantic>=2.7.0
+pydantic-settings>=2.2.0
+
+# Database & Vector Store
+SQLAlchemy>=2.0.28
+psycopg2-binary>=2.9.9
+pgvector>=0.2.5
+alembic>=1.13.1
+
+# Embeddings & Machine Learning
+sentence-transformers>=2.6.0
+torch>=2.2.0
+
+# LLM & Generation
+openai>=1.14.0
+python-dotenv>=1.0.1
+
+# Conversational Memory & Cache
+redis>=5.0.3
+
+# Testing & Quality
+pytest>=8.1.0
+httpx>=0.27.0

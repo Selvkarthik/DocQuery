@@ -1,19 +1,14 @@
-from retriever import retrieve_chunks
+"""Agent tools for backward compatibility."""
 
-def search_company_document(question):
-    results = retrieve_chunks(question, top_k=2)
+from app.services.retriever import retriever_service
+from app.services.agent_service import tool_calculate_percentage
 
-    return [
-        {
-            "content" : row['content'],
-            'source' : row['source'],
-            'chunk_index' : row['chunk_index'],
-            'distance' : row['distance']
-        }
-        for row in results
-    ]
 
-def calculate_percentage(part, whole):
-    if whole == 0:
-        raise ValueError("The whole value cannot be zero.")
-    return (part / whole) * 100
+def search_company_document(question: str):
+    """Search documents and return list of matches."""
+    return retriever_service.retrieve(question, top_k=2)
+
+
+def calculate_percentage(part: float, whole: float):
+    """Calculate percentage."""
+    return tool_calculate_percentage(part, whole)

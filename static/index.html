@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DocQuery | Conversational RAG & Knowledge Intelligence</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220%22%20%220%22%20%22100%22%20%22100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
+</head>
+<body>
+    <div class="app-background">
+        <div class="glow-orb orb-1"></div>
+        <div class="glow-orb orb-2"></div>
+    </div>
+
+    <!-- Navigation Header -->
+    <header class="navbar">
+        <div class="nav-brand">
+            <div class="brand-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                    <polyline points="10 9 9 9 8 9"></polyline>
+                </svg>
+            </div>
+            <div class="brand-text">
+                <span class="brand-title">DocQuery</span>
+                <span class="brand-subtitle">Enterprise RAG Engine</span>
+            </div>
+        </div>
+
+        <nav class="nav-tabs" role="tablist">
+            <button class="nav-tab active" data-tab="chat" id="tab-btn-chat">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                Conversational Chat
+            </button>
+            <button class="nav-tab" data-tab="documents" id="tab-btn-docs">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                Documents & Index
+            </button>
+            <button class="nav-tab" data-tab="search" id="tab-btn-search">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                Vector Explorer
+            </button>
+            <button class="nav-tab" data-tab="agent" id="tab-btn-agent">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="16" x2="8" y2="16"/><line x1="16" y1="16" x2="16" y2="16"/></svg>
+                Agent Playground
+            </button>
+        </nav>
+
+        <div class="nav-status">
+            <div class="status-indicator" id="system-status-pill" title="Live System Health">
+                <span class="status-dot"></span>
+                <span class="status-label" id="system-status-text">Connecting...</span>
+            </div>
+            <a href="/docs" target="_blank" class="btn-api-docs" title="Interactive Swagger Docs">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                API Docs
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="main-content">
+        <!-- 1. CHAT TAB -->
+        <section class="tab-panel active" id="panel-chat">
+            <div class="chat-container">
+                <!-- Session Sidebar -->
+                <aside class="chat-sidebar">
+                    <div class="sidebar-header">
+                        <h3>Sessions</h3>
+                        <button class="btn-icon" id="btn-new-session" title="New Session">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        </button>
+                    </div>
+                    <div class="session-input-group">
+                        <label for="session-id-input">Session ID:</label>
+                        <div class="session-input-wrapper">
+                            <input type="text" id="session-id-input" value="default" placeholder="e.g. hr-policy">
+                            <button class="btn-sm" id="btn-load-session">Load</button>
+                        </div>
+                    </div>
+                    <div class="session-settings">
+                        <h4>RAG Parameters</h4>
+                        <div class="setting-item">
+                            <div class="setting-label-row">
+                                <span>Top-K Chunks</span>
+                                <span class="setting-val" id="topk-val">3</span>
+                            </div>
+                            <input type="range" id="param-topk" min="1" max="8" value="3" class="slider">
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-label-row">
+                                <span>Min Similarity</span>
+                                <span class="setting-val" id="threshold-val">0.45</span>
+                            </div>
+                            <input type="range" id="param-threshold" min="0" max="0.9" step="0.05" value="0.45" class="slider">
+                        </div>
+                    </div>
+                    <div class="sidebar-actions">
+                        <button class="btn-danger-outline" id="btn-clear-history">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                            Clear Session Memory
+                        </button>
+                    </div>
+                </aside>
+
+                <!-- Chat Feed -->
+                <div class="chat-main">
+                    <div class="chat-messages" id="chat-messages">
+                        <div class="welcome-card">
+                            <div class="welcome-badge">⚡ DocQuery RAG Active</div>
+                            <h2>Welcome to your Document Assistant</h2>
+                            <p>Ask questions grounded directly in your company documents. The assistant uses <strong>PostgreSQL pgvector</strong> for dense semantic retrieval, retains context via <strong>Redis memory</strong>, and generates citations for every response.</p>
+                            <div class="quick-questions">
+                                <span>Try asking:</span>
+                                <button class="chip" data-q="How many annual leave days do interns receive?">Leave days for interns?</button>
+                                <button class="chip" data-q="What is the policy for emergency leave?">Emergency leave policy?</button>
+                                <button class="chip" data-q="Who approves leave requests?">Approval process?</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Input Bar -->
+                    <div class="chat-input-area">
+                        <form id="chat-form" class="chat-form">
+                            <textarea id="chat-input" placeholder="Ask a question about indexed documents..." rows="1" required></textarea>
+                            <button type="submit" id="btn-send" class="btn-send" title="Send Question">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. DOCUMENTS TAB -->
+        <section class="tab-panel" id="panel-documents">
+            <div class="panel-inner">
+                <div class="panel-header">
+                    <div>
+                        <h2>Document Knowledge Library</h2>
+                        <p>Manage, upload, and inspect plain text and markdown documents indexed in pgvector.</p>
+                    </div>
+                    <div class="panel-actions">
+                        <button class="btn-secondary" id="btn-scan-folder">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                            Re-Scan /documents Folder
+                        </button>
+                    </div>
+                </div>
+
+                <div class="upload-dropzone" id="upload-dropzone">
+                    <input type="file" id="file-input" accept=".txt,.md,.csv,.log" style="display: none;">
+                    <div class="dropzone-content" id="dropzone-trigger">
+                        <div class="upload-icon">
+                            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                        </div>
+                        <h3>Upload Knowledge Document</h3>
+                        <p>Drag & drop <code>.txt</code> or <code>.md</code> files here, or click to browse</p>
+                        <span class="upload-hint">Automatic sentence chunking, SHA-256 deduplication, and 384-d vector embeddings</span>
+                    </div>
+                    <div class="upload-progress" id="upload-progress" style="display: none;">
+                        <span class="spinner"></span>
+                        <span id="upload-status-text">Embedding and indexing document...</span>
+                    </div>
+                </div>
+
+                <div class="documents-section">
+                    <div class="section-title-row">
+                        <h3>Indexed Documents (<span id="doc-count">0</span>)</h3>
+                        <span class="badge" id="chunk-count-badge">0 Chunks in DB</span>
+                    </div>
+                    <div class="documents-grid" id="documents-grid">
+                        <div class="loading-state">
+                            <span class="spinner"></span> Loading indexed documents...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. VECTOR EXPLORER TAB -->
+        <section class="tab-panel" id="panel-search">
+            <div class="panel-inner">
+                <div class="panel-header">
+                    <div>
+                        <h2>Vector Semantic Search Explorer</h2>
+                        <p>Directly query the pgvector database without LLM synthesis to inspect cosine distance and similarity scores.</p>
+                    </div>
+                </div>
+
+                <div class="search-box-card">
+                    <div class="search-input-group">
+                        <input type="text" id="explorer-query" placeholder="Enter semantic search query..." value="intern leave allowance">
+                        <button class="btn-primary" id="btn-run-search">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                            Search Vectors
+                        </button>
+                    </div>
+                </div>
+
+                <div class="search-results-area">
+                    <h3>Retrieved Chunks (<span id="search-result-count">0</span>)</h3>
+                    <div class="search-results-list" id="search-results-list">
+                        <p class="placeholder-text">Click "Search Vectors" above to test vector retrieval.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. AGENT TAB -->
+        <section class="tab-panel" id="panel-agent">
+            <div class="panel-inner">
+                <div class="panel-header">
+                    <div>
+                        <h2>Tool-Augmented AI Agent</h2>
+                        <p>Test the agent equipped with document search, percentage calculations, and analytical synthesis.</p>
+                    </div>
+                </div>
+
+                <div class="agent-playground">
+                    <div class="agent-prompt-card">
+                        <label for="agent-prompt">Agent Task / Question:</label>
+                        <textarea id="agent-prompt" rows="3" placeholder="e.g. If an intern gets 10 days leave and regular employees get 22 days, what percentage of regular leave do interns receive?"></textarea>
+                        <div class="agent-actions">
+                            <button class="btn-primary" id="btn-run-agent">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                                Execute Agent Task
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="agent-output-card" id="agent-output-card" style="display: none;">
+                        <div class="output-header">
+                            <h3>Agent Reasoning & Solution</h3>
+                            <span class="badge badge-success">Completed</span>
+                        </div>
+                        <div class="agent-tools-used" id="agent-tools-used"></div>
+                        <div class="agent-answer" id="agent-answer"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Citation Modal -->
+    <div class="modal-overlay" id="citation-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-source-title">Source Citation</h3>
+                <button class="modal-close" id="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="citation-meta">
+                    <span class="badge" id="modal-sim-badge">Similarity: 0.00%</span>
+                    <span class="badge badge-subtle" id="modal-chunk-badge">Chunk 0</span>
+                </div>
+                <div class="citation-text" id="modal-chunk-text"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

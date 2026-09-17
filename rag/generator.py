@@ -1,30 +1,18 @@
-from openai import OpenAI
-from dotenv import load_dotenv
-import os
+"""LLM answer generator adapter for backward compatibility."""
 
-load_dotenv()
+from app.core.config import settings
+from app.services.generator import generator_service
 
-client = OpenAI(base_url='https://openrouter.ai/api/v1', api_key=os.getenv('API_KEY'))
+MODEL = settings.OPENROUTER_MODEL
 
-def generate_answer(question, context):
-    instruction = """Answer the question only using the provided context.
-    If the answer cannot be found in the context, say you don't know."""
 
-    prompt = f"""{instruction}
+def _client():
+    return generator_service._get_client()
 
-        Context:
-        {context}
 
-        Question:
-        {question}
-    """
-
-    response = client.chat.completions.create(
-        model = 'inclusionai/ling-3.0-flash-fin:free',
-        messages=[{
-            'role' : 'user',
-            'content' : prompt
-        }]
+def generate_answer(question: str, context: str):
+    """Generate answer given context and question."""
+    return generator_service.generate_answer(
+        question=question,
+        context_text=context,
     )
-
-    return response.choices[0].message.content

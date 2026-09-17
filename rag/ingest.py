@@ -1,61 +1,30 @@
-from sentence_transformers import SentenceTransformer
-from rag.database import SessionLocal
-from rag.models import DocumentChunk
-import re
+"""Ingest plain-text and markdown documents into the PostgreSQL/pgvector knowledge base.
+
+Run with ``python -m rag.ingest``
+"""
+
+import argparse
 from pathlib import Path
-import hashlib
+from app.core.config import settings
+from app.db.session import SessionLocal
+from app.services.ingestion import ingestion_service
 
-document_path = Path('./documents')
-files = list(document_path.glob('*.txt'))
 
-def get_file_hash(file_path):
-    with open(file_path, 'rb') as file:
-        return hashlib.sha256(file.read()).hexdigest()
-
-model = SentenceTransformer('all-MiniLM-L6-v2')
-
-chunk_size = 2
-overlap = 1
-
-def chunk_text(sentences, chunk_size, overlap):
-    chunks = []
-    for start in range(0, len(sentences), chunk_size-overlap):
-        chunks.append(' '.join(sentences[start : start + chunk_size]))
-    return chunks
-
-for file_path in files:
-    with open(file_path, 'r', encoding='utf-8') as file:
-        text = file.read()
-
-    file_hash = get_file_hash(file_path)
-
+def ingest_documents(document_path: Path = settings.DOCUMENTS_DIR):
+    """Ingest documents from specified directory into database."""
     db = SessionLocal()
     try:
-        existing_file = db.query(DocumentChunk).filter(DocumentChunk.source == file_path.name).first()
-        if existing_file:
-            if existing_file.file_hash == file_hash:
-                print(f"Skipping {file_path.name} - Already Ingested")
-                continue
-
-            print(f"{file_path.name} changed - re ingesting")
-            db.query(DocumentChunk).filter(DocumentChunk.source == file_path.name).delete()
-
-
-        print(f"Ingesting {file_path.name}...")
-
-        sentences = re.split(r'(?<=[?!.])\s+', text)
-        data = chunk_text(sentences, chunk_size, overlap)
-        embeddings = model.encode(data)
-
-        for index, (chunk, embedding) in enumerate(zip(data, embeddings)):
-            document = DocumentChunk(
-                content = chunk,
-                source = file_path.name,
-                chunk_index = index,
-                embedding = embedding.tolist(),
-                file_hash = file_hash
-            )
-            db.add(document)
-        db.commit()
+        return ingestion_service.ingest_folder(folder_path=document_path, db=db)
     finally:
         db.close()
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Ingest text/markdown documents into the RAG database.")
+    parser.add_argument("--documents", type=Path, default=settings.DOCUMENTS_DIR)
+    args = parser.parse_args()
+    summary = ingest_documents(args.documents)
+    print("Ingestion Summary:")
+    print(f" - Ingested / Updated: {summary['ingested']}")
+    print(f" - Skipped (Unchanged): {summary['skipped']}")
+    print(f" - Total Chunks Indexed: {summary['total_chunks']}")

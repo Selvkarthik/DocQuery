@@ -1,16 +1,5 @@
-from sqlalchemy import Column, Integer, Text, String
-from sqlalchemy.orm import DeclarativeBase
-from pgvector.sqlalchemy import Vector
+"""SQLAlchemy models adapter for backward compatibility."""
 
-class Base(DeclarativeBase):
-    pass
+from app.db.models import Base, DocumentChunk
 
-class DocumentChunk(Base):
-    __tablename__ = 'document_chunks'
-
-    id = Column(Integer, primary_key=True)
-    content = Column(Text, nullable=False)
-    source = Column(Text, nullable=False)
-    chunk_index = Column(Integer, nullable=False)
-    embedding = Column(Vector(384))
-    file_hash = Column(String(64), nullable=False)
+__all__ = ["Base", "DocumentChunk"]

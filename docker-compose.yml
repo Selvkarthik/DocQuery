@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  # Vector Database: PostgreSQL with pgvector extension pre-installed
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: docquery-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: rag_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password123
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgvector_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d rag_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Conversational Memory & Cache: Redis
+  redis:
+    image: redis:7-alpine
+    container_name: docquery-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # DocQuery FastAPI Application
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: docquery-api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - DB_USER=postgres
+      - DB_PWD=password123
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB=rag_db
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - API_KEY=${API_KEY}
+      - OPENROUTER_MODEL=${OPENROUTER_MODEL:-inclusionai/ling-3.0-flash-fin:free}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./documents:/app/documents
+
+volumes:
+  pgvector_data:
+  redis_data:

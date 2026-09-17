@@ -1,18 +1,15 @@
-import redis
-import json
+"""Redis memory adapter for backward compatibility."""
 
-redis_client = redis.Redis(
-    host='localhost',
-    port=6379,
-    decode_responses=True
-)
+from app.services.memory import memory_service
 
-def load_messages(session_id):
-    data = redis_client.get(f"session: {session_id}")
+redis_client = memory_service.client
 
-    if data:
-        return json.loads(data)
-    return []
 
-def save_messages(session_id, messages):
-    redis_client.set(f"session: {session_id}", json.dumps(messages))
+def load_messages(session_id: str):
+    """Load conversation messages for a session."""
+    return memory_service.load_messages(session_id)
+
+
+def save_messages(session_id: str, messages):
+    """Save conversation messages for a session."""
+    return memory_service.save_messages(session_id, messages)

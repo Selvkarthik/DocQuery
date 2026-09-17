@@ -1,38 +1,18 @@
-from fastapi import FastAPI
-from pydantic import BaseModel
-from typing import List
+"""DocQuery Application Server Entry Point
 
-from rag.rag_pipeline import question_answer
-from memory.redis_memory import load_messages, save_messages
+Run locally with:
+    python main.py
+or:
+    uvicorn main:app --reload --port 8000
+"""
 
-app = FastAPI()
+import uvicorn
+from app.main import app
 
-class QuestionRequest(BaseModel):
-    session_id : str
-    question : str
-
-class Source(BaseModel):
-    source : str
-    chunk_index : int
-    similarity : float
-
-class AnswerResponse(BaseModel):
-    answer : str
-    sources : List[Source]
-
-@app.post('/ask', response_model=AnswerResponse)
-def ask_question(request : QuestionRequest):
-    result = question_answer(request.question)
-
-    sources = []
-    for source in result['sources']:
-        sources.append({
-            'source' : source['source'],
-            'chunk_index' : source['chunk_index'],
-            'similarity' : 1 - source['distance']
-        })
-
-    return {
-        'answer' : result['answer'],
-        'sources' : sources
-    }
+if __name__ == "__main__":
+    uvicorn.run(
+        "main:app",
+        host="0.0.0.0",
+        port=8000,
+        reload=True,
+    )
