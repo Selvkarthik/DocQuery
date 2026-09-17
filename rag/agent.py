@@ -8,6 +8,8 @@ from tools import search_company_document, calculate_percentage
 
 load_dotenv()
 
+"""Manual agents are created here"""
+
 def load_messages(session_id):
     data = redis_client.get(f"session: {session_id}")
     if data:

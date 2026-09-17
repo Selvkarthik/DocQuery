@@ -1,6 +1,8 @@
 from .retriever import retrieve_chunks
 from .generator import generate_answer
 
+"""The complete rag pipeline"""
+
 def question_answer(question, top_k=2):
     sources = retrieve_chunks(question, top_k)
 
